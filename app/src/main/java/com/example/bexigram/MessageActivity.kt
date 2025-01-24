@@ -2,7 +2,9 @@ package com.example.bexigram
 
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.bexigram.adapters.MessageAdapter
@@ -14,6 +16,8 @@ import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+
 class MessageActivity : AppCompatActivity() {
 
     lateinit var currentUser: String
@@ -23,7 +27,9 @@ class MessageActivity : AppCompatActivity() {
     lateinit var firebaseDatabase: FirebaseDatabase
     lateinit var reference: DatabaseReference
     lateinit var statusIndicator: View // Status indicator for user
+
     private val binding by lazy { ActivityMessageBinding.inflate(layoutInflater) }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,11 +45,58 @@ class MessageActivity : AppCompatActivity() {
             override fun imageClick(message: Message) {
                 // Handle image click if necessary
             }
+
+            override fun onEdit(message: Message) {
+                // AlertDialog yaratish uchun
+                val alertDialog = AlertDialog.Builder(this@MessageActivity)
+                val dialogView = layoutInflater.inflate(R.layout.edit_dialog, null)
+                alertDialog.setView(dialogView)
+
+                // Dialogni yaratish
+                val dialog = alertDialog.create()
+                dialog.show()
+
+                // EditText ni sozlash va eski matnni ko'rsatish
+                val edt = dialogView.findViewById<EditText>(R.id.menu_edit)
+                edt.setText(message.text)
+
+                // Save tugmasini ishlashga sozlash
+                dialogView.findViewById<View>(R.id.btn_save).setOnClickListener {
+                    val newText = edt.text.toString()
+                    if (newText.isNotBlank()) {
+                        // Firebase'da xabarni yangilash
+                        message.text = newText
+                        reference.child(currentUser).child("messages").child(user.uid!!).child(message.id!!)
+                            .setValue(message)
+                        reference.child(user.uid!!).child("messages").child(currentUser).child(message.id!!)
+                            .setValue(message)
+                        dialog.dismiss() // Dialogni yopish
+                    } else {
+                        Toast.makeText(this@MessageActivity, "Message cannot be empty", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                // Cancel tugmasini ishlashga sozlash
+                dialogView.findViewById<View>(R.id.btn_cancel).setOnClickListener {
+                    dialog.dismiss() // Dialogni yopish
+                }
+            }
+
+
+
+            override fun onDelete(message: Message) {
+                reference.child(currentUser).child("messages").child(user.uid!!).child(message.id!!).removeValue()
+                reference.child(user.uid!!).child("messages").child(currentUser).child(message.id!!).removeValue()
+            }
+
+
         }, list, currentUser)
 
         // Set up RecyclerView
         binding.rv.layoutManager = LinearLayoutManager(this)
         binding.rv.adapter = messageAdapter
+        messageAdapter.notifyDataSetChanged() // Refresh the RecyclerView after the change
+
 
         // Set the user details
         binding.name.text = user.name
@@ -64,16 +117,20 @@ class MessageActivity : AppCompatActivity() {
                 val text = edtSend.text.toString()
                 if (text.isNotBlank()) {
                     val message = Message(text, currentUser, user.uid, "sent")
-                    message.date = getDate() // Date ni qo'shimcha o'rnatish
-                    val key = reference.child(user.uid!!).child("messages").push().key // Ensure proper message reference
+                    message.date = getDate() // Set the date
+                    val key = reference.child(user.uid!!).child("messages").push().key // Ensure key is generated
 
                     if (key != null) {
+                        message.id = key // Assign the key to messageId
                         // Send the message to both users' messages
                         reference.child(user.uid!!).child("messages").child(currentUser).child(key).setValue(message)
                         reference.child(currentUser).child("messages").child(user.uid!!).child(key).setValue(message)
 
                         edtSend.text.clear()
+                    } else {
+                        Toast.makeText(this@MessageActivity, "Failed to send message", Toast.LENGTH_SHORT).show()
                     }
+
                 }
             }
         }
@@ -97,6 +154,7 @@ class MessageActivity : AppCompatActivity() {
                     Toast.makeText(this@MessageActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                 }
             })
+
     }
 
     // Check the user status (online/offline)

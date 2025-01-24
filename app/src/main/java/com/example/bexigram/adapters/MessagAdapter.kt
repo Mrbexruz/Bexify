@@ -3,10 +3,13 @@ package com.example.bexigram.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bexigram.R
 import com.example.bexigram.databinding.ItemFromBinding
 import com.example.bexigram.databinding.ToItemBinding
 import com.example.bexigram.models.Message
+
 class MessageAdapter(
     private val rvAction: RvAction,
     private val list: ArrayList<Message>,
@@ -19,28 +22,41 @@ class MessageAdapter(
     // ViewHolder for sent messages (from the current user)
     inner class FromVh(private val itemRvBinding: ItemFromBinding) : RecyclerView.ViewHolder(itemRvBinding.root) {
         fun onBind(message: Message) {
-            // Show the message text if it's not null or empty
             itemRvBinding.tvSms.text = message.text
             itemRvBinding.tvDateTime.text = message.date
 
-
-            // Handle click action on the message
-            itemRvBinding.root.setOnClickListener {
-                rvAction.imageClick(message)
+            // Show edit/delete options when the user long-clicks on their message
+            itemRvBinding.root.setOnLongClickListener {
+                showPopupMenu(message, it)
+                true
             }
+        }
+
+        private fun showPopupMenu(message: Message, view: View) {
+            val popupMenu = PopupMenu(view.context, view)
+            popupMenu.inflate(R.menu.message_options_menu)
+            popupMenu.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.menu_edit -> {
+                        rvAction.onEdit(message) // Trigger the edit action
+                        true
+                    }
+                    R.id.menu_delete -> {
+                        rvAction.onDelete(message) // Trigger the delete action
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popupMenu.show()
         }
     }
 
     // ViewHolder for received messages (sent by the other user)
-    inner class ToVh(private val itemRvBindin: ToItemBinding) : RecyclerView.ViewHolder(itemRvBindin.root) {
+    inner class ToVh(private val itemRvBinding: ToItemBinding) : RecyclerView.ViewHolder(itemRvBinding.root) {
         fun onBind(message: Message) {
-            // Show the message text if it's not null or empty
-           itemRvBindin.tvSms.text = message.text
-            itemRvBindin.tvDateTime.text = message.date
-            // Handle click action on the message
-            itemRvBindin.root.setOnClickListener {
-                rvAction.imageClick(message)
-            }
+            itemRvBinding.tvSms.text = message.text
+            itemRvBinding.tvDateTime.text = message.date
         }
     }
 
@@ -77,5 +93,7 @@ class MessageAdapter(
 
     interface RvAction {
         fun imageClick(message: Message)
+        fun onEdit(message: Message) // Edit action
+        fun onDelete(message: Message) // Delete action
     }
 }

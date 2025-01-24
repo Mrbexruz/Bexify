@@ -27,21 +27,23 @@ class UsersActivity : AppCompatActivity(), UserAdapter.RvAction {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-
         // Firebase initialization
         auth = FirebaseAuth.getInstance()
         Picasso.get().load(auth.currentUser?.photoUrl).into(binding.imageProfile)
         firebaseDatabase = FirebaseDatabase.getInstance()
         reference = firebaseDatabase.getReference("users")
 
+        
+
         // RecyclerView setup
-        val myLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        binding.rv.layoutManager = myLayoutManager
+        binding.rv.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
         // Click on Floating Action Button to go to SearchActivity
-        binding.fab.setOnClickListener {
+        binding.search.setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
         }
+
+
 
         // Get users from Firebase
         reference.addValueEventListener(object : ValueEventListener {
@@ -65,6 +67,8 @@ class UsersActivity : AppCompatActivity(), UserAdapter.RvAction {
             }
         })
     }
+
+
 
     override fun itemClick(user: User) {
         val intent = Intent(this, MessageActivity::class.java)

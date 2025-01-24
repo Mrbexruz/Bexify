@@ -1,30 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/parent"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="end"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/linear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
         android:background="@drawable/edit_background"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_alignParentEnd="true"
+        android:gravity="end">
 
-        <TextView
-            android:id="@+id/tvSms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textSize="20sp"
-            android:textColor="@color/white"
-            android:padding="10dp"
-            tools:ignore="UnusedAttribute" />
+    <TextView
+        android:id="@+id/tvSms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:padding="10dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:layout_marginLeft="23dp"
+        android:layout_marginTop="3dp">
 
         <TextView
             android:id="@+id/tvDateTime"
@@ -32,10 +35,14 @@
             android:layout_height="wrap_content"
             android:text="01-Jan-2025 14:30"
             android:textSize="11sp"
-            android:textColor="@color/white"
-            android:padding="5dp"
-            android:layout_marginLeft="23dp"
-            android:layout_marginTop="3dp"
-            tools:ignore="UnusedAttribute" />
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:id="@+id/ic_1"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_check" />
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>
+    </RelativeLayout>

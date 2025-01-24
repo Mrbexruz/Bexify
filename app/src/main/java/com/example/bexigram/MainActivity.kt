@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
-            val intent  = Intent(this,UsersActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+           val intent  = Intent(this,UsersActivity::class.java)
+           startActivity(intent)
+          finish()
+       }
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -89,30 +89,7 @@ class MainActivity : AppCompatActivity() {
                         user?.uid.toString(),
                         user?.photoUrl.toString()
                     )
-                    reference.addListenerForSingleValueEvent(object :ValueEventListener{
-
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            var isHase = false
-                            val children = snapshot.children
-                            for (child in children) {
-                                val value = child.getValue(User::class.java)
-                                if (value?.uid == user?.uid) {
-                                    isHase = true
-                                }
-                            }
-                            if (isHase) {
-                                val intent  = Intent(this@MainActivity,UsersActivity::class.java)
-                                startActivity(intent)
-                            }else{
-                                setNever(users)
-                            }
-                        }
-
-
-                        override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
-                        }
-                    })
+                    setNever(users)
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
@@ -121,11 +98,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
-    private fun setNever(user: User){
-        reference.child(user.uid?:"").setValue(user)
+
+    private fun setNever(user: User) {
+        reference.child(user.uid!!).setValue(user)
             .addOnSuccessListener {
-                val intent  = Intent(this,UsersActivity::class.java)
+                Log.d(TAG, "User added successfully")
+                val intent = Intent(this, UsersActivity::class.java)
                 startActivity(intent)
+                finish() // Activity'ni tugatish uchun
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Failed to add user: ${e.message}")
+                Toast.makeText(this, "Xatolik: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 }

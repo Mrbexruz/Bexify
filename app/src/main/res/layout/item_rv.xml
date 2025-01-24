@@ -38,7 +38,7 @@
             android:layout_gravity="center"/>
 
         <!-- Status indicator (onlayn/offlayn holatni ko'rsatish) -->
-        <View
+        <ImageView
             android:id="@+id/status_indicator"
             android:layout_width="10dp"
             android:layout_height="10dp"
